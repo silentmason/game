@@ -1,112 +1,113 @@
-/* General Styles */
+/* CSS Reset (as before) */
+body, h1, h2, h3, p, ul, li, footer {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
 body {
-    font-family: 'Arial', sans-serif; /* Use a modern font */
-    background-color: #f4f4f4; /* Light background */
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Align items at the top */
-    height: auto; /* Allow the body to expand */
-    margin: 0;
-    padding: 20px 0; /* Add some padding to the top and bottom */
+    font-family: 'Roboto', sans-serif; /* Modern font */
+    line-height: 1.6;
+    background-color: #121212; /* Dark background */
+    color: #fff; /* Light text */
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Header */
-h1 {
-    text-align: center;
-    padding: 20px;
-    background-color: #007bff; /* A vibrant blue */
-    color: white;
-    margin: 0;
-    border-bottom: 2px solid #0056b3;
-}
-
-/* Content Container */
+/* General Styling */
 #content {
-    flex: 1; /* Fill remaining space */
+    width: 85%;
+    max-width: 960px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.05); /* Semi-transparent panel */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     text-align: center;
-    padding: 20px;
 }
 
-/* Google Sign-In Button */
-#google-signin-button {
-    margin-bottom: 20px;
-}
-
-/* User Info */
-#user-info {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+h1 {
+    font-size: 3em;
+    margin-bottom: 30px;
     text-align: center;
-    margin-bottom: 20px;
+    color: #64ffda; /* Neon accent color */
+    text-shadow: 0 0 10px rgba(100, 255, 218, 0.8);
 }
 
-#user-info h2 {
-    margin-top: 0;
-    color: #007bff;
+h2 {
+    font-size: 2em;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #64ffda;
 }
 
-/* Game List */
-#game-list {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 600px;
-}
-
-#game-list h2 {
-    margin-top: 0;
-    color: #007bff;
-}
-
-#game-list ul {
+ul {
     list-style: none;
     padding: 0;
 }
 
-#game-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+li {
+    margin-bottom: 10px;
 }
 
-#game-list li:last-child {
-    border-bottom: none;
-}
-
-#game-list a {
-    color: #007bff;
+a {
+    color: #bb86fc; /* Another accent color */
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-#game-list a:hover {
-    color: #0056b3;
+a:hover {
+    text-decoration: none;
+    color: #64ffda;
 }
 
-/* Footer */
 footer {
     text-align: center;
-    padding: 10px;
-    background-color: #333;
-    color: white;
-    margin-top: 20px;
+    padding: 30px;
+    background-color: #212121;
+    color: #bdbdbd;
+    margin-top: 50px;
 }
 
-/* Canvas Style */
-canvas {
-    background: #eee;
+/* Google Sign-In Button Styling */
+#google-signin-button {
+    margin: 30px auto;
+}
+
+/* Game Canvas Styling */
+#gameCanvas {
+    border: 2px solid #64ffda;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    #game-list {
-        width: 95%;
+/* Game List Styling */
+#game-list {
+    margin-top: 30px;
+}
+
+/* User Info Styling */
+#user-info {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #64ffda;
+    border-radius: 8px;
+}
+
+/* Keyframes for subtle animation */
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
     }
+    100% {
+        box-shadow: 0 0 20px rgba(100, 255, 218, 0.8);
+    }
+}
+
+/* Apply animation to elements */
+h1 {
+    animation: glow 2s infinite alternate;
 }
