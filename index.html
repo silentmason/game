@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
 </head>
 <body>
+  <div style="width: 100%">
     <h1>Game Platform</h1>
     <div id="content">
         <div id="google-signin-button"></div>
@@ -27,6 +28,8 @@
     <footer>
         &copy; 2024 Game Platform
     </footer>
+  </div>
+
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="https://download.playfab.com/PlayFabClientApi.js"></script>
     <script src="https://app.photonengine.com/js/photon-javascript_realtime-v110.js"></script>
@@ -40,17 +43,48 @@
         }
         var customId = generateUUID();
         console.log("Generated Custom ID: " + customId);
+
         // PlayFab initialization
         var settings = {
             titleId: "84AC1" // Replace with your PlayFab Title ID
         };
         PlayFab.settings = settings;
-        // Photon initialization
-        var photonAppId = "5717f161-4fb8-4ca2-94a3-3a461f53f4cf"; // Replace with your Photon App ID
-        var photonClient = new Photon.PhotonRealtime.LoadBalancingClient({
-            appId: photonAppId,
-            region: "us" // Replace with your Photon region
-        });
+
+        // Initialize Photon
+        function initializePhoton() {
+            // Photon initialization
+            var photonAppId = "5717f161-4fb8-4ca2-94a3-3a461f53f4cf"; // Replace with your Photon App ID
+            var photonClient = new Photon.PhotonRealtime.LoadBalancingClient({
+                appId: photonAppId,
+                region: "us" // Replace with your Photon region
+            });
+
+            window.photonClient = photonClient; // Make photonClient accessible globally
+
+            photonClient.onConnectedToMaster.addEventListener(function () {
+                console.log("Connected to Photon Master Server");
+                // Join or create a room
+                joinOrCreateRoom();
+            });
+            photonClient.onJoinRoom.addEventListener(function () {
+                console.log("Joined Room: " + photonClient.room.name);
+                startGame();
+            });
+            photonClient.onActorJoin.addEventListener(function (actor) {
+                console.log("Actor Joined Room: " + actor.actorNr);
+            });
+            photonClient.onActorLeave.addEventListener(function (actor) {
+                console.log("Actor Left Room: " + actor.actorNr);
+            });
+            photonClient.onEvent.addEventListener(function (code, content, actorNr) {
+                // Handle incoming game events (position updates)
+                if (code === 1) { // Custom event code for position update
+                    otherPlayerX = content.x;
+                    otherPlayerY = content.y;
+                }
+            });
+        }
+
         var canvas = document.getElementById("gameCanvas");
         var ctx = canvas.getContext("2d");
         let playerX = 240;
@@ -91,6 +125,7 @@
                 rightPressed = false;
             }
         }
+
         // Authenticate with PlayFab (using Custom ID)
         function loginWithPlayFab() {
             var loginRequest = {
@@ -104,6 +139,8 @@
             console.log("PlayFab Login Successful!");
             console.log("PlayFab ID: " + result.PlayFabId);
             PlayFab.ClientApi.AuthenticationContext.clientSessionTicket = result.SessionTicket;
+			PlayFab.settings.PlayFabId = result.PlayFabId; // Store PlayFabId
+
             // Get Photon authentication token from PlayFab Cloud Script
             getPhotonToken();
         }
@@ -134,34 +171,13 @@
             console.error("Failed to get Photon token: " + error.errorMessage);
         }
         function connectToPhoton(photonToken) {
-            photonClient.onConnectedToMaster.addEventListener(function () {
-                console.log("Connected to Photon Master Server");
-                // Join or create a room
-                joinOrCreateRoom();
-            });
-            photonClient.onJoinRoom.addEventListener(function () {
-                console.log("Joined Room: " + photonClient.room.name);
-                startGame();
-            });
-            photonClient.onActorJoin.addEventListener(function (actor) {
-                console.log("Actor Joined Room: " + actor.actorNr);
-            });
-            photonClient.onActorLeave.addEventListener(function (actor) {
-                console.log("Actor Left Room: " + actor.actorNr);
-            });
-            photonClient.onEvent.addEventListener(function (code, content, actorNr) {
-                // Handle incoming game events (position updates)
-                if (code === 1) { // Custom event code for position update
-                    otherPlayerX = content.x;
-                    otherPlayerY = content.y;
-                }
-            });
-            photonClient.connectToRegionMaster("us");
-            var authenticationValues = new Photon.PhotonRealtime.AuthenticationValues();
-            authenticationValues.UserId = PlayFab.settings.PlayFabId; // use PlayFab player id
-            authenticationValues.AuthType = Photon.PhotonRealtime.CustomAuthenticationType.Custom;
-            authenticationValues.AuthParameters = { "username": PlayFab.settings.PlayFabId, "token": photonToken };
-            photonClient.setAuthenticationValues(authenticationValues);
+			var authenticationValues = new Photon.PhotonRealtime.AuthenticationValues();
+			authenticationValues.UserId = PlayFab.settings.PlayFabId; // use PlayFab player id
+			authenticationValues.AuthType = Photon.PhotonRealtime.CustomAuthenticationType.Custom;
+			authenticationValues.AuthParameters = { "username": PlayFab.settings.PlayFabId, "token": photonToken };
+			window.photonClient.setAuthenticationValues(authenticationValues);
+
+            window.photonClient.connectToRegionMaster("us");
         }
         function joinOrCreateRoom() {
             var roomOptions = {
@@ -169,13 +185,15 @@
                 isOpen: true,
                 maxPlayers: 2
             };
-            photonClient.createRoom(null, roomOptions);
+            window.photonClient.createRoom(null, roomOptions);
         }
         function updateGameState(x, y) {
             // Send player position as a Photon event
             var eventContent = { x: x, y: y };
-            var raiseEventOptions = { receivers: Photon.PhotonRealtime.ReceiverGroup.Others }; // Send to other players
-            photonClient.raiseEvent(1, eventContent, raiseEventOptions); // 1 is a custom event code
+            var raiseEventOptions = {
+                receivers: Photon.PhotonRealtime.ReceiverGroup.Others
+            }; // Send to other players
+            window.photonClient.raiseEvent(1, eventContent, raiseEventOptions); // 1 is a custom event code
         }
         var otherPlayerX = 240; // other player's initial position
 var otherPlayerY = 50; // other player's initial position
@@ -193,10 +211,10 @@ var otherPlayerY = 50; // other player's initial position
             playerX += dx;
             playerY += dy;
             // Keep the ball within the canvas bounds
-            if (playerX + dx > canvas.width-10 || playerX + dx < 10) {
+            if (playerX + dx > canvas.width - 10 || playerX + dx < 10) {
                 playerX -= dx; // Reverse the movement
             }
-            if (playerY + dy > canvas.height-10 || playerY < 10) {
+            if (playerY + dy > canvas.height - 10 || playerY < 10) {
                 playerY -= dy;
             }
             // Update PlayFab with the current player's game state
@@ -205,14 +223,14 @@ var otherPlayerY = 50; // other player's initial position
         }
         function drawBall(x, y, color) {
             ctx.beginPath();
-            ctx.arc(x, y, 10, 0, Math.PI*2);
+            ctx.arc(x, y, 10, 0, Math.PI * 2);
             ctx.fillStyle = color;
             ctx.fill();
             ctx.closePath();
         }
         function startGame() {
-  canvas.style.display = "block"; // Show the canvas
-  gameList.style.display = "block"; // Show the game list
+            canvas.style.display = "block"; // Show the canvas
+            gameList.style.display = "block"; // Show the game list
             draw();
         }
 
@@ -261,12 +279,24 @@ function loadGoogleSignIn() {
 }
 
 // Call loadGoogleSignIn when the page loads
-window.onload = function() {
-  loadGoogleSignIn();
-};
+//window.onload = function() {
+//  loadGoogleSignIn();
+//};
 
 var gameList = document.getElementById("game-list");
     </script>
+ <script>
+	 	if (typeof Photon !== 'undefined') {
+            initializePhoton();
+        } else {
+            console.warn('Photon API not loaded');
+        }
+
+      if (typeof gapi !== 'undefined') {
+        loadGoogleSignIn();
+      } else {
+        console.warn('Google API not loaded');
+      }
+    </script>
 </body>
 </html>
-

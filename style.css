@@ -6,9 +6,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+    justify-content: flex-start; /* Align items at the top */
+    height: auto; /* Allow the body to expand */
     margin: 0;
+    padding: 20px 0; /* Add some padding to the top and bottom */
 }
 
 /* Header */
