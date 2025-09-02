@@ -9,14 +9,59 @@
 </head>
 <body>
     <canvas id="gameCanvas" width="480" height="320"></canvas>
+
     <script>
         var canvas = document.getElementById("gameCanvas");
         var ctx = canvas.getContext("2d");
 
         var x = canvas.width/2;
         var y = canvas.height-30;
-        var dx = 2;
-        var dy = -2;
+        var dx = 0; // Initial velocity is 0
+        var dy = 0;
+
+        var speed = 2; // Movement speed
+
+        // Key press state
+        var upPressed = false;
+        var downPressed = false;
+        var leftPressed = false;
+        var rightPressed = false;
+
+        // Key event listeners
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+        function keyDownHandler(e) {
+            if (e.key == "w" || e.key == "W") {
+                upPressed = true;
+            }
+            if (e.key == "s" || e.key == "S") {
+                downPressed = true;
+            }
+            if (e.key == "a" || e.key == "A") {
+                leftPressed = true;
+            }
+            if (e.key == "d" || e.key == "D") {
+                rightPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (e.key == "w" || e.key == "W") {
+                upPressed = false;
+            }
+            if (e.key == "s" || e.key == "S") {
+                downPressed = false;
+            }
+            if (e.key == "a" || e.key == "A") {
+                leftPressed = false;
+            }
+            if (e.key == "d" || e.key == "D") {
+                rightPressed = false;
+            }
+        }
+
+
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
@@ -24,14 +69,25 @@
             ctx.fillStyle = "#0095DD";
             ctx.fill();
             ctx.closePath();
+
+            // Update velocity based on key presses
+            if (upPressed) dy = -speed;
+            else if (downPressed) dy = speed;
+            else dy = 0; // Stop movement when key is released
+
+            if (leftPressed) dx = -speed;
+            else if (rightPressed) dx = speed;
+            else dx = 0;
+
             x += dx;
             y += dy;
 
+            // Keep the ball within the canvas bounds
             if (x + dx > canvas.width-10 || x + dx < 10) {
-                dx = -dx;
+               x -= dx; // Reverse the movement
             }
             if (y + dy > canvas.height-10 || y + dy < 10) {
-                dy = -dy;
+                y -= dy;
             }
 
             requestAnimationFrame(draw);
