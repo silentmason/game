@@ -3,8 +3,9 @@
 <head>
     <title>Game Platform</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="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.apps.googleusercontent.com">
+    <meta name="google-signin-client_id" content="691636065786-0bosr2lfo61bkk00lpkkpbe3sgl4egv9.apps.googleusercontent.com">
     <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+    <link rel="icon" href="https://raw.githubusercontent.com/silentmason/Unightly-Club-Hangout/refs/heads/main/UCHimage.webp" type="image/webp"> <!-- Favicon -->
 </head>
 <body>
     <h1>Game Platform</h1>
@@ -81,6 +82,10 @@
                     otherPlayerY = content.y;
                 }
             });
+			photonClient.onDisconnected.addEventListener(function (reason) {
+				console.warn("Disconnected from Photon:", reason);
+				//Implement Reconnect logic here
+			});
         }
 
         var canvas = document.getElementById("gameCanvas");
@@ -146,6 +151,24 @@
             console.error("PlayFab Login Failed: " + error.errorMessage);
             // Handle login failure (display error message, retry, etc.)
         }
+		//Retry Get Photon Token
+		function getPhotonTokenWithRetry(retryCount = 0) {
+			const maxRetries = 3;
+			PlayFabClientSDK.ExecuteCloudScript({
+				FunctionName: "authenticateWithPhoton",
+				Params: {},
+				GeneratePlayStreamEvent: true
+			}, (result) => onGetPhotonTokenSuccess(result), (error) => {
+				console.error("Failed to get Photon token:", error.errorMessage);
+				if (retryCount < maxRetries) {
+					console.log(`Retrying Photon token retrieval (${retryCount + 1}/${maxRetries})...`);
+					setTimeout(() => getPhotonTokenWithRetry(retryCount + 1), 2000); // Retry after 2 seconds
+				} else {
+					console.error("Max retries reached for Photon token retrieval. Giving up.");
+					// Handle failure appropriately (e.g., display an error message to the user)
+				}
+			});
+		}
         // Get Photon token from PlayFab Cloud Script
         function getPhotonToken() {
             PlayFabClientSDK.ExecuteCloudScript({
@@ -191,7 +214,7 @@
             var raiseEventOptions = {
                 receivers: Photon.PhotonRealtime.ReceiverGroup.Others
             }; // Send to other players
-            window.photonClient.raiseEvent(1, eventContent, raiseEventOptions); // 1 is a custom event code
+            window.photonClient.raiseEvent(1, content, raiseEventOptions); // 1 is a custom event code
         }
         var otherPlayerX = 240; // other player's initial position
 var otherPlayerY = 50; // other player's initial position
@@ -267,9 +290,12 @@ function renderButton() {
 
 // Load the Google Sign-In SDK
 function loadGoogleSignIn() {
-  gapi.load('auth2', function() {
+  gapi.load('auth2', {
+	  client_id: '691636065786-0bosr2lfo61bkk00lpkkpbe3sgl4egv9.apps.googleusercontent.com',
+      scope: 'profile email'
+  }).then(function() {
     gapi.auth2.init({
-      client_id: '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.apps.googleusercontent.com'
+      client_id: '691636065786-0bosr2lfo61bkk00lpkkpbe3sgl4egv9.apps.googleusercontent.com'
     }).then(function() {
       renderButton();
     });
@@ -277,9 +303,9 @@ function loadGoogleSignIn() {
 }
 
 // Call loadGoogleSignIn when the page loads
-//window.onload = function() {
-//  loadGoogleSignIn();
-//};
+window.onload = function() {
+  loadGoogleSignIn();
+};
 
 var gameList = document.getElementById("game-list");
     </script>
