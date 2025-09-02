@@ -1,0 +1,105 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif; /* Use a modern font */
+    margin: 0;
+    background-color: #f4f4f4; /* Light background */
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header */
+h1 {
+    text-align: center;
+    padding: 20px;
+    background-color: #007bff; /* A vibrant blue */
+    color: white;
+    margin: 0;
+    border-bottom: 2px solid #0056b3;
+}
+
+/* Content Container */
+#content {
+    flex: 1; /* Fill remaining space */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Google Sign-In Button */
+#google-signin-button {
+    margin-bottom: 20px;
+}
+
+/* User Info */
+#user-info {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#user-info h2 {
+    margin-top: 0;
+    color: #007bff;
+}
+
+/* Game List */
+#game-list {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+}
+
+#game-list h2 {
+    margin-top: 0;
+    color: #007bff;
+}
+
+#game-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+#game-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#game-list li:last-child {
+    border-bottom: none;
+}
+
+#game-list a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+#game-list a:hover {
+    color: #0056b3;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    #game-list {
+        width: 95%;
+    }
+}

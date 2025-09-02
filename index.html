@@ -1,100 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Simple Canvas Game</title>
-    <style>
-        body { margin: 0; }
-        canvas { background: #eee; }
-    </style>
+    <title>Game Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
 </head>
 <body>
-    <canvas id="gameCanvas" width="480" height="320"></canvas>
+    <h1>Game Platform</h1>
 
-    <script src="https://app.photonengine.com/js/photon-javascript_realtime-v110.js"></script>
+    <div id="content">
+        <div id="google-signin-button"></div>
+
+        <div id="user-info" style="display: none;">
+            <h2>Welcome, <span id="user-name"></span>!</h2>
+            <p>Email: <span id="user-email"></span></p>
+        </div>
+
+        <div id="game-list" style="display: none;">
+            <h2>Available Games:</h2>
+            <ul>
+                <li><a href="#">Game 1</a></li>
+                <li><a href="#">Game 2</a></li>
+                <li><a href="#">Game 3</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2024 Game Platform
+    </footer>
+
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script>
-        var canvas = document.getElementById("gameCanvas");
-        var ctx = canvas.getContext("2d");
+        let userProfile = null; // Store user profile data
 
-        var x = canvas.width/2;
-        var y = canvas.height-30;
-        var dx = 0; // Initial velocity is 0
-        var dy = 0;
+        function onSuccess(googleUser) {
+            userProfile = googleUser.getBasicProfile(); // Get user profile object
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log('Logged in as: ' + userProfile.getName());
+            console.log('ID Token: ' + id_token);
 
-        var speed = 5; // Movement speed
+            // Display user info
+            document.getElementById('user-name').innerText = userProfile.getName();
+            document.getElementById('user-email').innerText = userProfile.getEmail();
+            document.getElementById('user-info').style.display = 'block';
 
-        // Key press state
-        var upPressed = false;
-        var downPressed = false;
-        var leftPressed = false;
-        var rightPressed = false;
+            // Hide sign-in button and show game list
+            document.getElementById('google-signin-button').style.display = 'none';
+            document.getElementById('game-list').style.display = 'block';
 
-        // Key event listeners
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-
-        function keyDownHandler(e) {
-            if (e.key == "w" || e.key == "W") {
-                upPressed = true;
-            }
-            if (e.key == "s" || e.key == "S") {
-                downPressed = true;
-            }
-            if (e.key == "a" || e.key == "A") {
-                leftPressed = true;
-            }
-            if (e.key == "d" || e.key == "D") {
-                rightPressed = true;
-            }
+            // Load games (hardcoded for simplicity)
+            loadGames();
         }
 
-        function keyUpHandler(e) {
-            if (e.key == "w" || e.key == "W") {
-                upPressed = false;
-            }
-            if (e.key == "s" || e.key == "S") {
-                downPressed = false;
-            }
-            if (e.key == "a" || e.key == "A") {
-                leftPressed = false;
-            }
-            if (e.key == "d" || e.key == "D") {
-                rightPressed = false;
-            }
+        function onFailure(error) {
+            console.log(error);
         }
 
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.arc(x, y, 10, 0, Math.PI*2);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
-
-            // Update velocity based on key presses
-            if (upPressed) dy = -speed;
-            else if (downPressed) dy = speed;
-            else dy = 0; // Stop movement when key is released
-
-            if (leftPressed) dx = -speed;
-            else if (rightPressed) dx = speed;
-            else dx = 0;
-
-            x += dx;
-            y += dy;
-
-            // Keep the ball within the canvas bounds
-            if (x + dx > canvas.width-10 || x + dx < 10) {
-               x -= dx; // Reverse the movement
-            }
-            if (y + dy > canvas.height-10 || y + dy < 10) {
-                y -= dy;
-            }
-
-            requestAnimationFrame(draw);
+        function renderButton() {
+            gapi.signin2.render('google-signin-button', {
+                'scope': 'profile email',
+                'width': 240,
+                'height': 50,
+                'longtitle': true,
+                'theme': 'dark',
+                'onsuccess': onSuccess,
+                'onfailure': onFailure
+            });
         }
 
-        draw();
+        function start() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'});
+                renderButton();
+            });
+        }
+
+        function loadGames() {
+            const games = [
+                { id: 1, name: 'Game 1', 'url': '#' },
+                { id: 2, name: 'Game 2', 'url': '#' },
+                { id: 3, name: 'Game 3', 'url': '#' }
+            ];
+
+            const gameListElement = document.getElementById('game-list').querySelector('ul');
+            games.forEach(game => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = game.url;
+                link.textContent = game.name;
+                listItem.appendChild(link);
+                gameListElement.appendChild(listItem);
+            });
+        }
+
+        start();
     </script>
 </body>
 </html>
